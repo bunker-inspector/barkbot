@@ -1,6 +1,6 @@
 # Barkbot
 
-**TODO: Add description**
+ Eventually a Twitter bot to randomly harass people to go adopt animals from shelers
 
 ## Installation
 
