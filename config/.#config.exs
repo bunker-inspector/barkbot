@@ -1,1 +1,0 @@
-ted@friendputer.5354:1570381570
