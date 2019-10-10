@@ -6,7 +6,8 @@ defmodule Barkbot.Repo.Migrations.InitUrlTable do
   alias Barkbot.Repo
 
   def up do
-    Stream.chunk_every(1..0xffff, 500)
+    #46655 is 'ZZZ' in base 36
+    Stream.chunk_every(1..46655, 1000)
     |> Enum.each(fn ck ->
       to_insert = Enum.map(ck, &(%{id: &1, short: Url.id_to_url(&1) |> elem(1)}))
       Repo.insert_all(Url, to_insert)

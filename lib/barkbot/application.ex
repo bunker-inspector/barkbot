@@ -13,7 +13,7 @@ defmodule Barkbot.Application do
       # Start the endpoint when the application starts
       BarkbotWeb.Endpoint,
 
-      UrlShortener
+      Url
       # Starts a worker by calling: Barkbot.Worker.start_link(arg)
       # {Barkbot.Worker, arg},
     ]

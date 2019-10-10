@@ -4,7 +4,7 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
   def up do
     create table("urls") do
       add :long, :text
-      add :short, :text
+      add :short, :text, null: false
     end
 
     create index("urls", [:long])
@@ -14,16 +14,18 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
       add :id, :integer, primary_key: true
       add :age, :text
       add :declawed, :boolean
-      add :breeds, :json
       add :coat, :text
+      add :primary_color, :text
+      add :secondary_color, :text
+      add :tertiary_color, :text
       add :house_trained, :boolean
       add :shots_current, :boolean
       add :spayed_neutered, :boolean
       add :special_needs, :boolean
       add :mixed_breed, :boolean
-      add :primary_breed, :boolean
-      add :secondary_breed, :boolean
-      add :tertiary_breed, :boolean
+      add :primary_breed, :text
+      add :secondary_breed, :text
+      add :breed_unknown, :boolean
       add :contact_address_1, :text
       add :contact_address_2, :text
       add :contact_city, :text
@@ -42,13 +44,18 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
       add :size, :text
       add :status, :text
       add :type, :text
-      add :url, references(:urls)
+      add :url_id, references(:urls, on_delete: :nilify_all)
 
       timestamps()
     end
+
+    create index("animals", [:status])
+    create index("animals", [:type])
   end
 
   def down do
+    drop index("animals", "animals_url_fkey")
+
     drop table(:animals)
     drop table(:urls)
   end

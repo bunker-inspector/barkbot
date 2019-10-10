@@ -1,14 +1,14 @@
 version: "3.7"
 services:
   db:
-    image: postgres:12.0
+    image: postgres:11.5
     ports:
       - 5433:5432
     environment:
       - POSTGRES_DB=barkbot_dev
       - POSTGRES_USER=barkbot
       - POSTGRES_PASSWORD=password
-  
+
   app:
     build:
       context: .
