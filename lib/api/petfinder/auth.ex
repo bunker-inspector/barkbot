@@ -1,4 +1,4 @@
-defmodule Api.Auth do
+defmodule Api.Petfinder.Auth do
   @api_base "https://api.petfinder.com/v2/oauth2/token"
 
   defmacro api_key do

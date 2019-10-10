@@ -1,5 +1,5 @@
-defmodule Api.Animals do
-  alias Api.Auth
+defmodule Api.Petfinder.Animals do
+  alias Api.Petfinder.Auth
 
   @api_base "https://api.petfinder.com/v2/animals"
 
