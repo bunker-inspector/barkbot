@@ -2,12 +2,15 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
   use Ecto.Migration
 
   def up do
-    create table(:urls) do
+    create table("urls") do
       add :long, :text
       add :short, :text
     end
 
-    create table(:animals, primary_key: false) do
+    create index("urls", [:long])
+    create unique_index("urls", [:short])
+
+    create table("animals", primary_key: false) do
       add :id, :integer, primary_key: true
       add :age, :text
       add :declawed, :boolean

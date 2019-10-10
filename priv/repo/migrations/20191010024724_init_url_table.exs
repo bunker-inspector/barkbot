@@ -1,6 +1,8 @@
 defmodule Barkbot.Repo.Migrations.InitUrlTable do
   use Ecto.Migration
 
+  import Ecto.Query
+
   alias Barkbot.Repo
 
   def up do
@@ -12,6 +14,6 @@ defmodule Barkbot.Repo.Migrations.InitUrlTable do
   end
 
   def down do
-    Repo.query("TRUNCATE urls", [])
+    Repo.delete_all(Url)
   end
 end
