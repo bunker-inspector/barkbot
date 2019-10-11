@@ -104,7 +104,7 @@ defmodule Animals do
 
     {url_id, _} = Url.shorten(url)
 
-    %Animals{
+    %{
       id: id,
       age: age,
       declawed: declawed,

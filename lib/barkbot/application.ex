@@ -13,7 +13,9 @@ defmodule Barkbot.Application do
       # Start the endpoint when the application starts
       BarkbotWeb.Endpoint,
 
-      Url
+      Url,
+
+      Animals.Aggregator
       # Starts a worker by calling: Barkbot.Worker.start_link(arg)
       # {Barkbot.Worker, arg},
     ]

@@ -44,8 +44,8 @@ defmodule Url do
 
   # Server (callbacks)
   @impl true
-  def init(_) do
-    {:ok, fetch_ids()}
+  def init(init_ids) do
+    {:ok, init_ids}
   end
 
   @impl true
