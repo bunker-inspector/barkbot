@@ -1,9 +1,8 @@
 defmodule Url do
   use GenServer
   use Ecto.Schema
-
+  require Logger
   import Ecto.Query
-
   alias Barkbot.Repo
 
   @shortened_url_len 4
@@ -50,7 +49,15 @@ defmodule Url do
 
   @impl true
   def handle_call({:shorten, url}, from, []) do
-    handle_call({:shorten, url}, from, fetch_ids())
+    ids = fetch_ids()
+
+    if Enum.empty? ids do
+      Logger.info "No more free IDs available. Halting"
+
+      {:error, nil}
+    else
+      handle_call {:shorten, url}, from, ids
+    end
   end
 
   @impl true
@@ -60,6 +67,11 @@ defmodule Url do
       on_conflict: {:replace, [:long]},
       returning: [:short]
 
-    {:reply, {curr_id, short}, queue}
+    {:reply, {:ok, {curr_id, short}}, queue}
+  end
+
+  @impl true
+  def handle_call(:urls_available, _from, queue) do
+    {:reply, !Enum.empty?(queue), queue}
   end
 end

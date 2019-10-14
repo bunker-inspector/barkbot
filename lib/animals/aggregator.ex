@@ -1,5 +1,6 @@
 defmodule Animals.Aggregator do
   use GenServer
+  require Logger
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -23,9 +24,14 @@ defmodule Animals.Aggregator do
 
   @impl true
   def init(_) do
-    IO.puts "Animals.Aggregator started."
+    case GenServer.call(Url, :urls_available) do
+      {:ok, _} ->
+        Logger.info "Animals.Aggregator started."
+        Process.send_after self(), :aggregate, 60 * 1000
+      _ ->
+        Logger.warn "No URLs available. Animals.Aggregator not starting"
+    end
 
-    Process.send_after self(), :aggregate, 60 * 1000
     {:ok, nil}
   end
 end

@@ -102,7 +102,7 @@ defmodule Animals do
       "url" => url
     } = api_record
 
-    {url_id, _} = Url.shorten(url)
+    {:ok, {url_id, _}} = Url.shorten(url)
 
     %{
       id: id,
