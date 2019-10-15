@@ -14,9 +14,7 @@ defmodule BarkbotWeb.Router do
   end
 
   scope "/", BarkbotWeb do
-    pipe_through :browser
-
-    get "/", PageController, :index
+    get "/:short_url", RedirectController, :redirect_to_long
   end
 
   # Other scopes may use custom stacks.

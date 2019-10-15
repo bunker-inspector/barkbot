@@ -3,21 +3,18 @@ defmodule Barkbot.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  import Supervisor.Spec
   use Application
 
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Start the Ecto repository
       Barkbot.Repo,
-      # Start the endpoint when the application starts
       BarkbotWeb.Endpoint,
-
       Url,
-
-      Animals.Aggregator
-      # Starts a worker by calling: Barkbot.Worker.start_link(arg)
-      # {Barkbot.Worker, arg},
+      Animals.Aggregator,
+      worker(Cachex, [:url_cache, [limit: 100,
+                                   policy: Cachex.Policy.LRW]])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

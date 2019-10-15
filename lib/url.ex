@@ -6,7 +6,7 @@ defmodule Url do
   alias Barkbot.Repo
 
   @shortened_url_len 4
-  
+
   schema "urls" do
     field :long, :string
     field :short, :string
@@ -40,6 +40,12 @@ defmodule Url do
 
   def shorten(url) do
     GenServer.call(__MODULE__ , {:shorten, url})
+  end
+
+  def get(short_url) do
+    Cachex.fetch :url_cache, short_url, fn short_url ->
+      Repo.get_by!(Url, [short: short_url]).long
+    end
   end
 
   # Server (callbacks)

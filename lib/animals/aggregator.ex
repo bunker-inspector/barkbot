@@ -28,7 +28,7 @@ defmodule Animals.Aggregator do
   def init(_) do
     if GenServer.call(Url, :urls_available) do
       Logger.info "Animals.Aggregator started."
-      Process.send_after self(), :aggregate, 1000
+      Process.send_after self(), :aggregate, 60 * 1000 * 10
     else
       Logger.warn "No URLs available. Animals.Aggregator not starting"
     end

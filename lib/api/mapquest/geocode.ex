@@ -9,7 +9,8 @@ defmodule Api.Mapquest.Geocoding do
     opts = Keyword.merge([key: consumer_key()], opts)
     query = for {k, v} <- opts, into: %{}, do: {k,v}
 
-    HTTPotion.get!("#{@api_base}/address", query: query).body |> Jason.decode!()
+    HTTPotion.get!("#{@api_base}/address", query: query).body
+    |> Jason.decode!()
     |> Map.get("results")
     |> hd
     |> Map.get("locations")
