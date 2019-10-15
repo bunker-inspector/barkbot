@@ -10,6 +10,15 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
     create index("urls", [:long])
     create unique_index("urls", [:short])
 
+    create table("coordinates") do
+      add :city, :text
+      add :state, :text
+      add :lat, :float
+      add :long, :float
+    end
+
+    create unique_index("coordinates", [:city, :state])
+
     create table("animals", primary_key: false) do
       add :id, :integer, primary_key: true
       add :age, :text
@@ -42,9 +51,11 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
       add :organization_id, :text
       add :photos, :json
       add :size, :text
+      add :tags, :json
       add :status, :text
       add :type, :text
       add :url_id, references(:urls, on_delete: :nilify_all)
+      add :coordinate_id, references(:coordinates)
 
       timestamps()
     end
@@ -58,5 +69,6 @@ defmodule Barkbot.Repo.Migrations.CreateAnimalsTable do
 
     drop table(:animals)
     drop table(:urls)
+    drop table(:coordinates)
   end
 end

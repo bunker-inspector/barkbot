@@ -13,6 +13,7 @@ defmodule Url do
   end
 
   def fetch_ids() do
+    Logger.info "Animals.Aggregator fetching IDs"
     (from u in Url,
       select: [:id],
       order_by: fragment("RANDOM()"),
