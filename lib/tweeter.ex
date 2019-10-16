@@ -12,6 +12,7 @@ defmodule Tweeter do
     = Animals
     |> order_by(fragment("RANDOM()"))
     |> preload(:coordinates)
+    |> preload(:url)
     |> Repo.paginate(page: page)
 
     {entries, page_number, total_pages}
@@ -21,8 +22,28 @@ defmodule Tweeter do
     GenServer.start_link(__MODULE__, get_page(), name: __MODULE__)
   end
 
-  def do_tweet(entry) do
-    IO.inspect entry
+  def image_to_binary(url) do
+    url_binary = List.Chars.to_charlist(url)
+    {:ok, {_, _, binary}} = :httpc.request(:get, {url_binary, []}, [], [body_format: :binary])
+    binary
+  end
+
+  def tweet!(entry) do
+    if false do
+      lat = entry.coordinates.lat
+      long = entry.coordinates.long
+      tweets = ExTwitter.search("", geocode: "#{lat},#{long},25mi")
+      lucky_soul = Enum.random(tweets).user
+    end
+
+    if Enum.empty? entry.photos do
+      :nil
+    else
+      photo_url = Enum.random(entry.photos)["large"]
+      photo_binary = image_to_binary photo_url
+
+      ExTwitter.API.Tweets.update_with_media("THIS IS A TEST", photo_binary)
+    end
   end
 
   defp sched_next(state, time \\ Util.minutes(10)) do
@@ -31,6 +52,8 @@ defmodule Tweeter do
 
   @impl true
   def init(state) do
+    Application.ensure_all_started :inets
+
     sched_next state, 15
 
     {:ok, nil}
@@ -38,7 +61,7 @@ defmodule Tweeter do
 
   @impl true
   def handle_info({:tweet, {[entry | r], page_number, total_pages}}, _) do
-    do_tweet entry
+    tweet! entry
 
     sched_next {r, page_number, total_pages}
 
@@ -51,3 +74,4 @@ defmodule Tweeter do
     handle_info {:tweet, state}, from
   end
 end
+
