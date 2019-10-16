@@ -13,6 +13,7 @@ defmodule Barkbot.Application do
       BarkbotWeb.Endpoint,
       Url,
       Animals.Aggregator,
+      Tweeter,
       worker(Cachex, [:url_cache, [limit: 100,
                                    policy: Cachex.Policy.LRW]])
     ]

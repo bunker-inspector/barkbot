@@ -7,4 +7,7 @@ defmodule Util do
       t -> t
     end
   end
+
+  defmacro seconds(num_seconds), do: num_seconds * 1000
+  defmacro minutes(num_minutes), do: num_minutes * seconds(60)
 end

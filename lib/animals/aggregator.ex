@@ -1,6 +1,7 @@
 defmodule Animals.Aggregator do
   use GenServer
   require Logger
+  import Util
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -17,9 +18,11 @@ defmodule Animals.Aggregator do
       Map.merge(record, %{inserted_at: now, updated_at: now})
     end)
 
-    Barkbot.Repo.insert_all(Animals, db_animals)
+    Barkbot.Repo.insert_all Animals, db_animals,
+      conflict_target: [:id],
+      on_conflict: :replace_all_except_primary_key
 
-    Process.send_after self(), :aggregate, 60 * 1000 * 5
+    Process.send_after self(), :aggregate, Util.minutes(5)
 
     {:noreply, nil}
   end
@@ -28,7 +31,7 @@ defmodule Animals.Aggregator do
   def init(_) do
     if GenServer.call(Url, :urls_available) do
       Logger.info "Animals.Aggregator started."
-      Process.send_after self(), :aggregate, 60 * 1000 * 10
+      Process.send_after self(), :aggregate, Util.minutes(10)
     else
       Logger.warn "No URLs available. Animals.Aggregator not starting"
     end
