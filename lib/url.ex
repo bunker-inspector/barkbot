@@ -43,7 +43,7 @@ defmodule Url do
   end
 
   def shorten(url, [curr_id | queue]) do
-    {:ok, %{short: short}} = Repo.insert %Url{id: curr_id, long: url, short: ""},
+    %{short: short} = Repo.insert! %Url{id: curr_id, long: url, short: ""},
       conflict_target: [:id],
       on_conflict: {:replace, [:long]},
       returning: [:short]
