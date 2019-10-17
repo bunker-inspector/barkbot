@@ -21,7 +21,8 @@ defmodule Barkbot.MixProject do
     [
       mod: {Barkbot.Application, []},
       extra_applications: [:logger, :runtime_tools,
-                           :cachex, :scrivener_ecto]
+                           :cachex, :scrivener_ecto,
+                           :ecto_sql]
     ]
   end
 
@@ -48,7 +49,9 @@ defmodule Barkbot.MixProject do
       {:oauther, "~> 1.1"},
       {:extwitter, "~> 0.8"},
       {:cachex, "~> 3.2"},
-      {:scrivener_ecto, "~> 2.0"}
+      {:scrivener_ecto, "~> 2.0"},
+      {:mustache, "~> 0.3.0"},
+      {:distillery, "~> 2.1"}
     ]
   end
 

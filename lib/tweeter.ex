@@ -13,6 +13,9 @@ defmodule Tweeter do
     |> order_by(fragment("RANDOM()"))
     |> where(fragment("json_array_length(photos) > 0"))
     |> where([a], a.status == "adoptable")
+    |> where([a], a.type == "Dog")
+    |> or_where([a], a.type == "Cat")
+    |> or_where([a], a.type == "Bird")
     |> preload(:coordinates)
     |> preload(:url)
     |> Repo.paginate(page: page)
@@ -37,7 +40,7 @@ defmodule Tweeter do
       rescue
         e in ExTwitter.RateLimitExceededError ->
           :timer.sleep ((e.reset_in + 1) * 1000)
-        unquote(expr)
+          unquote(expr)
       end
     end
   end
@@ -47,17 +50,15 @@ defmodule Tweeter do
       lat = entry.coordinates.lat
       long = entry.coordinates.long
       tweets = rate_limit_retry ExTwitter.search("", geocode: "#{lat},#{long},25mi")
-      lucky_soul = Enum.random(tweets).user
+      lucky_soul_at = "@#{Enum.random(tweets).user.screen_name}"
     end
 
-    if Enum.empty? entry.photos do
-      :nil
-    else
-      photo_url = Enum.random(entry.photos)["large"]
-      photo_binary = image_to_binary photo_url
+    photo_url = Enum.random(entry.photos)["large"]
+    photo_binary = image_to_binary photo_url
 
-      rate_limit_retry ExTwitter.API.Tweets.update_with_media("THIS IS A TEST", photo_binary)
-    end
+    text = Templates.random_render_tweet "@StoreBrandHuman", entry
+
+    rate_limit_retry ExTwitter.API.Tweets.update_with_media(text, photo_binary)
   end
 
   defp sched_next(state, time \\ Util.minutes(10)) do
