@@ -11,11 +11,13 @@ defmodule Tweeter do
                     total_pages: total_pages}
     = Animals
     |> order_by(fragment("RANDOM()"))
+    |> where(fragment("json_array_length(photos) > 0"))
+    |> where([a], a.status == "adoptable")
     |> preload(:coordinates)
     |> preload(:url)
     |> Repo.paginate(page: page)
 
-    {entries, page_number, total_pages}
+ {entries, page_number, total_pages}
   end
 
   def start_link(_) do
@@ -28,11 +30,23 @@ defmodule Tweeter do
     binary
   end
 
+  defmacro rate_limit_retry(expr) do
+    quote do
+      try do
+        unquote(expr)
+      rescue
+        e in ExTwitter.RateLimitExceededError ->
+          :timer.sleep ((e.reset_in + 1) * 1000)
+        unquote(expr)
+      end
+    end
+  end
+
   def tweet!(entry) do
     if false do
       lat = entry.coordinates.lat
       long = entry.coordinates.long
-      tweets = ExTwitter.search("", geocode: "#{lat},#{long},25mi")
+      tweets = rate_limit_retry ExTwitter.search("", geocode: "#{lat},#{long},25mi")
       lucky_soul = Enum.random(tweets).user
     end
 
@@ -42,7 +56,7 @@ defmodule Tweeter do
       photo_url = Enum.random(entry.photos)["large"]
       photo_binary = image_to_binary photo_url
 
-      ExTwitter.API.Tweets.update_with_media("THIS IS A TEST", photo_binary)
+      rate_limit_retry ExTwitter.API.Tweets.update_with_media("THIS IS A TEST", photo_binary)
     end
   end
 

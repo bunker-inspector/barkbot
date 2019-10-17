@@ -1,5 +1,5 @@
 defmodule Url do
-  use GenServer
+  use Agent
   use Ecto.Schema
   require Logger
   import Ecto.Query
@@ -35,11 +35,34 @@ defmodule Url do
   end
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, fetch_ids(), name: __MODULE__)
+    Agent.start_link(&fetch_ids/0, name: __MODULE__)
   end
 
   def shorten(url) do
-    GenServer.call(__MODULE__ , {:shorten, url})
+    shorten(url, Agent.get(__MODULE__, & &1))
+  end
+
+  def shorten(url, [curr_id | queue]) do
+    {:ok, %{short: short}} = Repo.insert %Url{id: curr_id, long: url, short: ""},
+      conflict_target: [:id],
+      on_conflict: {:replace, [:long]},
+      returning: [:short]
+
+    Agent.update(__MODULE__, fn _ -> queue end)
+
+    {:ok, {curr_id, short}}
+  end
+
+  def shorten(url, []) do
+    ids = fetch_ids()
+
+    if Enum.empty? ids do
+      Logger.info "No more free IDs available. Halting"
+
+      {:error, nil}
+    else
+      shorten url, ids
+    end
   end
 
   def get(short_url) do
@@ -48,37 +71,19 @@ defmodule Url do
     end
   end
 
-  # Server (callbacks)
-  @impl true
-  def init(init_ids) do
-    {:ok, init_ids}
-  end
+  def urls_available do
+    queue = Agent.get(__MODULE__, & &1)
 
-  @impl true
-  def handle_call({:shorten, url}, from, []) do
-    ids = fetch_ids()
-
-    if Enum.empty? ids do
-      Logger.info "No more free IDs available. Halting"
-
-      {:error, nil}
+    if !Enum.empty? queue do
+      true
     else
-      handle_call {:shorten, url}, from, ids
+      next_batch = fetch_ids()
+      if Enum.empty? next_batch do
+        false
+      else
+        Agent.update(__MODULE__, fn _ -> next_batch end)
+        true
+      end
     end
-  end
-
-  @impl true
-  def handle_call({:shorten, url}, _from, [curr_id | queue]) do
-    {:ok, %{short: short}} = Repo.insert %Url{id: curr_id, long: url, short: ""},
-      conflict_target: [:id],
-      on_conflict: {:replace, [:long]},
-      returning: [:short]
-
-    {:reply, {:ok, {curr_id, short}}, queue}
-  end
-
-  @impl true
-  def handle_call(:urls_available, _from, queue) do
-    {:reply, !Enum.empty?(queue), queue}
   end
 end
