@@ -31,7 +31,7 @@ defmodule Animals.Aggregator do
   def init(_) do
     if Url.urls_available() do
       Logger.info "Animals.Aggregator started."
-      Process.send_after self(), :aggregate, Util.minutes(10)
+      Process.send_after self(), :aggregate, Util.seconds(10)
     else
       Logger.warn "No URLs available. Animals.Aggregator not starting"
     end

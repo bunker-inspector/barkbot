@@ -13,8 +13,8 @@ config :barkbot,
 # Configures the endpoint
 config :barkbot, BarkbotWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: System.get_env("SECRET_KEY_BASE"),
   render_errors: [view: BarkbotWeb.ErrorView, accepts: ~w(html json)],
+  secret_key_base: System.get_env("SECRET_KEY_BASE"),
   pubsub: [name: Barkbot.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
