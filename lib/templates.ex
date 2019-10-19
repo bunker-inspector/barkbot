@@ -1,13 +1,18 @@
 defmodule Templates do
+  defmacro domain do
+    System.get_env("DOMAIN")
+  end
 
-  #Not exactly random yet...
-  def random_render_tweet(twitter_at, animal_data) do
-    """
-    Hey {{twitter_at}}, it must be pretty cool living near {{contact_city}}!
-    It would be even cooler if you adopted {{name}}, a/n {{age}}
-    {{type}} in need of a home.
+  def pick_template do
+    File.ls!(Path.join(:code.priv_dir(:barkbot), "templates"))
+    |> Enum.random()
+    |> (fn x -> Path.join(:code.priv_dir(:barkbot), "templates/#{x}") end).()
+    |> File.read()
+    |> elem(1)
+  end
 
-    """
-    |> Mustache.render(Map.from_struct(animal_data) |> Map.put(:twitter_at, twitter_at))
+  def random_render_tweet(data) do
+    ("#{pick_template()} #{domain()}/#{data.url.short}")
+    |> Mustache.render(data)
   end
 end

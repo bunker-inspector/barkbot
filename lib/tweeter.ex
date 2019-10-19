@@ -2,6 +2,7 @@ defmodule Tweeter do
   use GenServer
   require Logger
   require Util
+  require Poison
   import Ecto.Query
   alias Barkbot.Repo
 
@@ -10,17 +11,15 @@ defmodule Tweeter do
                     page_number: page_number,
                     total_pages: total_pages}
     = Animals
+    |> where([a], a.status == "adoptable")
     |> order_by(fragment("RANDOM()"))
     |> where(fragment("json_array_length(photos) > 0"))
-    |> where([a], a.status == "adoptable")
-    |> where([a], a.type == "Dog")
-    |> or_where([a], a.type == "Cat")
-    |> or_where([a], a.type == "Bird")
+    |> where([a], a.type in ["Dog", "Cat", "Bird"])
     |> preload(:coordinates)
     |> preload(:url)
     |> Repo.paginate(page: page)
 
- {entries, page_number, total_pages}
+    {entries, page_number, total_pages}
   end
 
   def start_link(_) do
@@ -46,17 +45,15 @@ defmodule Tweeter do
   end
 
   def tweet!(entry) do
-    if false do
-      lat = entry.coordinates.lat
-      long = entry.coordinates.long
-      tweets = rate_limit_retry ExTwitter.search("", geocode: "#{lat},#{long},25mi")
-      lucky_soul_at = "@#{Enum.random(tweets).user.screen_name}"
-    end
+    lat = entry.coordinates.lat
+    long = entry.coordinates.long
+    tweets = rate_limit_retry ExTwitter.search("", geocode: "#{lat},#{long},25mi")
+    lucky_soul_at = "@#{Enum.random(tweets).user.screen_name}"
 
     photo_url = Enum.random(entry.photos)["large"]
     photo_binary = image_to_binary photo_url
 
-    text = Templates.random_render_tweet "@StoreBrandHuman", entry
+    text = Templates.random_render_tweet(entry |> Map.from_struct() |> Map.put(:twitter_at, "@StoreBrandHuman"))
 
     rate_limit_retry ExTwitter.API.Tweets.update_with_media(text, photo_binary)
   end

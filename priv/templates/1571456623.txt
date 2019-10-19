@@ -1,0 +1,1 @@
+Hey {{twitter_at}}. You look bored. Why don't you go adopt {{name}}, who is available near you?

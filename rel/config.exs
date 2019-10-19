@@ -52,7 +52,8 @@ release :barkbot do
     "migrate": "rel/commands/migrate.sh"
   ]
   set applications: [
-    :runtime_tools
+    :runtime_tools,
+    poison: :load
   ]
 end
 
