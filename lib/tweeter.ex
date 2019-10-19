@@ -45,6 +45,8 @@ defmodule Tweeter do
   end
 
   def tweet!(entry) do
+    Logger.info "Tweeting about:", entry: entry
+
     lat = entry.coordinates.lat
     long = entry.coordinates.long
     tweets = rate_limit_retry ExTwitter.search("", geocode: "#{lat},#{long},25mi")
@@ -53,7 +55,7 @@ defmodule Tweeter do
     photo_url = Enum.random(entry.photos)["large"]
     photo_binary = image_to_binary photo_url
 
-    text = Templates.random_render_tweet(entry |> Map.from_struct() |> Map.put(:twitter_at, "@StoreBrandHuman"))
+    text = Templates.random_render_tweet(entry |> Map.from_struct() |> Map.put(:twitter_at, lucky_soul_at))
 
     rate_limit_retry ExTwitter.API.Tweets.update_with_media(text, photo_binary)
   end
@@ -66,7 +68,7 @@ defmodule Tweeter do
   def init(state) do
     Application.ensure_all_started :inets
 
-    sched_next state, 15
+    sched_next state
 
     {:ok, nil}
   end

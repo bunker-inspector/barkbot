@@ -1,0 +1,8 @@
+{:source-paths ["src"]
+ :dependencies []
+ :builds {:app {:output-dir "js/"
+                :asset-path "."
+                :target :browser
+                :js-options {:js-provider :require}
+                :modules {:app {:init-fn app.main/main!}}
+                :devtools {:after-load app.main/reload!}}}}

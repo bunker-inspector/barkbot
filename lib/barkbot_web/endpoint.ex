@@ -39,8 +39,8 @@ defmodule BarkbotWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug Plug.Session,
     store: :cookie,
-    key: "_barkbot_key",
-    signing_salt: "8HOyOJs5"
+    key: System.get_env("SESSION_KEY"),
+    signing_salt: System.get_env("SESSION_SALT")
 
   plug BarkbotWeb.Router
 end
