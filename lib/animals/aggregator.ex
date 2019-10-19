@@ -1,7 +1,8 @@
 defmodule Animals.Aggregator do
   use GenServer
   require Logger
-  import Util
+  require Util
+  alias Barkbot.Repo
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -13,14 +14,17 @@ defmodule Animals.Aggregator do
 
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
-    db_animals = Enum.map(animals, &Animals.api_to_db/1)
-    |> Enum.map(fn record ->
-      Map.merge(record, %{inserted_at: now, updated_at: now})
-    end)
+    Repo.transaction fn ->
+      db_animals = animals
+      |>Enum.map(&Animals.api_to_db/1)
+      |> Enum.map(fn record ->
+        Map.merge(record, %{inserted_at: now, updated_at: now})
+      end)
 
-    Barkbot.Repo.insert_all Animals, db_animals,
-      conflict_target: [:id],
-      on_conflict: :replace_all_except_primary_key
+      Barkbot.Repo.insert_all Animals, db_animals,
+        conflict_target: [:id],
+        on_conflict: :replace_all_except_primary_key
+    end
 
     Process.send_after self(), :aggregate, Util.minutes(5)
 
