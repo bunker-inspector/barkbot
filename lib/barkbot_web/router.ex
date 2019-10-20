@@ -18,13 +18,7 @@ defmodule BarkbotWeb.Router do
     get "/", PageController, :index
   end
 
-
   scope "/", BarkbotWeb do
     get "/:short_url", RedirectController, :redirect_to_long
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", BarkbotWeb do
-  #   pipe_through :api
-  # end
 end
