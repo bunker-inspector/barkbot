@@ -1,28 +1,27 @@
-
-;;import {Socket} from "phoenix"
-(ns socket
+(ns app.socket
   (:require ["phoenix" :as phx]))
 
-;;let socket = new Socket("/socket", {params: {token: window.userToken}})
-(def socket
-  (phx/Socket
-   "/socket"
-   {:params {:token (js/window -userToken)}}))
+(defn create
+  []
+  (new phx/Socket
+       "/socket"
+       {:params {:token (.-userToken js/window)}}))
 
-;;socket.connect()
-(.connect socket)
+(defn connect! [socket]
+  (.connect socket)
+  socket)
 
-;;// Now that you are connected, you can join channels with a topic:
-;;let channel = socket.channel("topic:subtopic", {})
-(def channel
-  (.channel socket "topic/subtopic" {}))
+(defn join!
+  [socket topic username]
+  (let [channel (.channel socket topic (clj->js {:username username}))]
+    (.join channel)
+    channel))
 
-;;channel.join()
-(.join channel)
+(defn send!
+  [channel message]
+  (.push channel "message:add" (clj->js {:message message})))
 
-;;.receive("ok", resp => { console.log("Joined successfully", resp) })
-(.receive channel "ok" #(println (str "Joined Succeessfully" %)))
-;;.receive("error", resp => { console.log("Unable to join", resp) })
-(.receive channel "error" #(println (str "Joined Succeessfully" %)))
-;;
-;;export default socket
+(defn on!
+  [entity event fn]
+  (.on entity event fn)
+  entity)
